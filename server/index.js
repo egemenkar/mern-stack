@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 /// DATABASE CONNECTION
-mongoose.connect('mongodb://127.0.0.1:27017/mern', {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect('mongodb://127.0.0.1:27017/mern', {useNewUrlParser: true});
 
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
@@ -19,7 +19,7 @@ app.post("/addfriend", async (req, res) => {
 
     const friend = new FriendModel({name: name, age: age});
     await friend.save();
-    res.send("Success");
+    res.send(friend);
 });
 
 app.get("/read", async (req, res) => {
@@ -32,6 +32,28 @@ app.get("/read", async (req, res) => {
     });
 
 });
+
+app.put("/update", async (req, res) => {
+    const newAge = req.body.newAge;
+    const id = req.body.id;
+
+    try {
+        FriendModel.findById(id, (error, friendToUpdate) => {
+            friendToUpdate.age = Number(newAge);
+            friendToUpdate.save();
+        })
+    } catch(err) {
+        console.log(err);
+    }
+
+    res.send("updated");
+});
+
+app.delete("/delete/:id", async (req, res)=> {
+    const id = req.params.id;
+    await FriendModel.findByIdAndRemove(id).exec();
+    res.send("itemdeleted");
+})
 
 app.listen(3001, () => {
     console.log("You're connected!");
