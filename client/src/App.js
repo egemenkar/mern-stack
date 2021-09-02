@@ -1,26 +1,31 @@
 import './App.css';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Axios from "axios";
 
 function App() {
   
   const [name, setName] = useState("");
   const [age, setAge] = useState(0);
+  const [listOfFriends, setListOfFriends] = useState([]);
 
   const addFriend = () => {
     Axios.post("http://localhost:3001/addfriend", {
       name: name,
        age: age,
+    }).then(()=> {
+      setListOfFriends([...listOfFriends, {name: name, age: age}]);
     })
-      .then(() => {
-        alert("Works");
-    })
-      .catch(() => {
-        alert("Something wrong!")
-      });
   };
 
-
+  useEffect(() => {
+    Axios.get("http://localhost:3001/read")
+      .then((response) => {
+        setListOfFriends(response.data);
+    })
+      .catch(() => {
+        console.log("ERR");
+      });
+  }, [])
   return (
     <div className="App">
       <div className="inputs">
@@ -36,7 +41,21 @@ function App() {
         />
         <button onClick={addFriend} >Add Friend</button>
       </div>
-      
+      <div className="listOfFriends">
+        {listOfFriends.map((val)=> {
+          return (
+            <div className="friendContainer">
+              <div className="friend"> 
+                <h3>Name: {val.name}</h3> 
+                <h3>Age: {val.age} </h3>
+              </div>
+              <button>Update</button>
+              <button id="removeBtn" >X</button>
+            </div>
+              
+          );
+        })}
+      </div>
     </div>
   );
 }
